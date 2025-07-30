@@ -1,0 +1,49 @@
+<script>
+    const questions = [
+        { 
+            question: "Qual é o slogan da Massoni Gás?", 
+            options: [
+                "Seu gás, nossa força", 
+                "Gás confiável, é com a Massoni Gás", 
+                "O gás da região"
+            ], 
+            correct: 1 
+        },
+        { 
+            question: "Onde a Massoni Gás atua?", 
+            options: [
+                "Santana de Parnaíba, Barueri e Pirapora do Bom Jesus", 
+                "Fazendinha", 
+                "Alphaville/Tamboré"
+            ], 
+            correct: 0 
+        },
+        { 
+            question: "Qual é a cor do botijão da Massoni Gás?", 
+            options: [
+                "Pratinha da Nacional Gás", 
+                "Amarelo", 
+                "Verde"
+            ], 
+            correct: 0 
+        },
+        { 
+            question: "Quantos dias por semana a Massoni Gás está aberta?", 
+            options: [
+                "5 dias", 
+                "6 dias", 
+                "Todos os dias e feriados"
+            ], 
+            correct: 2 
+        },
+        { 
+            question: "Além do gás, o que a Massoni Gás distribui?", 
+            options: [
+                "Água mineral", 
+                "Cervejas", 
+                "Carvão"
+            ], 
+            correct: 0 
+        }
+    ];
+</script>
