@@ -37,7 +37,12 @@
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
-        .option.incorrect { background: var(--secondary); color: #fff; }
+        .option.incorrect { background: var(--secondary); color: #fff; animation: shake 0.5s; }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-8px); }
+            40%, 80% { transform: translateX(8px); }
+        }
         .btn { background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; padding: 12px 25px; color: #fff; border-radius: 8px; cursor: pointer; transition: 0.3s ease; font-weight: bold; }
         .btn.correct-btn { background: var(--success); }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--shadow); }
@@ -48,10 +53,19 @@
         @keyframes flash { from { opacity: 1; } to { opacity: 0.5; } }
         .whatsapp-share { margin-top: 15px; display: inline-block; background: #25D366; padding: 10px 20px; border-radius: 8px; color: white; font-weight: bold; text-decoration: none; }
         .extra-text { margin-top: 10px; font-size: 0.95rem; color: #333; }
-        .confetti { position: fixed; width: 10px; height: 10px; background: red; animation: confetti-fall 3s linear infinite; z-index: 9999; }
-        @keyframes confetti-fall {
-            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        .mascote-voando {
+            position: fixed;
+            top: 50%;
+            left: -200px;
+            width: 150px;
+            height: auto;
+            animation: flyAcross 1.5s ease-out forwards;
+            z-index: 9999;
+        }
+        @keyframes flyAcross {
+            0% { left: -200px; top: 50%; transform: scale(0.5); opacity: 0; }
+            50% { opacity: 1; transform: scale(1.1); }
+            100% { left: 120%; top: 40%; opacity: 0; transform: scale(0.8); }
         }
     </style>
 </head>
@@ -97,6 +111,8 @@
     </div>
 
     <audio id="final-sound" src="https://www.myinstants.com/media/sounds/olha-o-gas.mp3"></audio>
+    <audio id="error-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
+    <audio id="correct-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
 
     <script>
         const questions = [
@@ -119,17 +135,12 @@
             return `MASSONI-GÁS${value}${randomCode}`;
         }
 
-        function createConfetti() {
-            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
-            for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.left = Math.random() * 100 + 'vw';
-                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-                confetti.style.animationDelay = Math.random() * 2 + 's';
-                document.body.appendChild(confetti);
-                setTimeout(() => confetti.remove(), 3000);
-            }
+        function showMascoteVoando() {
+            const img = document.createElement('img');
+            img.src = 'Mascote_voando.jpeg';
+            img.className = 'mascote-voando';
+            document.body.appendChild(img);
+            setTimeout(() => img.remove(), 1500);
         }
 
         function startQuiz() {
@@ -157,16 +168,20 @@
         }
 
         function selectOption(index, element) {
+            const errorSound = document.getElementById("error-sound");
+            const correctSound = document.getElementById("correct-sound");
             const correctIndex = questions[currentQuestion].correct;
             const options = document.querySelectorAll(".option");
             if (index === correctIndex) {
                 element.classList.add("correct");
                 document.getElementById("next-btn").classList.add("correct-btn");
                 score += 2;
-                createConfetti();
+                correctSound.play();
+                showMascoteVoando();
             } else {
                 element.classList.add("incorrect");
                 document.getElementById("next-btn").classList.remove("correct-btn");
+                errorSound.play();
             }
             document.getElementById("score-display").textContent = `💰 Pontos: R$ ${score},00`;
             options.forEach(opt => opt.onclick = null);
@@ -190,7 +205,6 @@
             const message = `🎉 Consegui $${score},00 de desconto no Quiz da Massoni Gás! Meu cupom é: ${couponCode}. 🔥 Gás confiável, é com a Massoni Gás!`;
             document.getElementById("whatsapp-share").href = `https://wa.me/?text=${encodeURIComponent(message)}`;
 
-            // Tocar o som final "Olha o gás"
             document.getElementById("final-sound").play();
         }
 
