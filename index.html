@@ -8,6 +8,7 @@
         :root {
             --primary: #004a93;
             --secondary: #e30613;
+            --success: #28a745;
             --white: #ffffff;
             --light-gray: #f8f9fa;
             --shadow: rgba(0, 0, 0, 0.2);
@@ -24,14 +25,21 @@
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         .progress-bar { height: 10px; background: var(--light-gray); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
         .progress { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.4s ease; }
+        .question-counter, .score-display { font-size: 1rem; text-align: center; margin-bottom: 10px; color: #333; }
         .question-card { background: var(--light-gray); border-radius: 12px; padding: 20px; margin-bottom: 20px; box-shadow: 0 5px 15px var(--shadow); }
         .question-text { font-size: 1.2rem; margin-bottom: 15px; color: #333; }
         .options { display: flex; flex-direction: column; gap: 10px; }
         .option { padding: 10px; background: var(--white); border-radius: 8px; border: 2px solid #ddd; cursor: pointer; transition: all 0.3s ease; }
         .option:hover { border-color: var(--primary); transform: translateY(-2px); }
-        .option.correct { background: var(--primary); color: #fff; }
+        .option.correct { background: var(--success); color: #fff; animation: correctPulse 0.5s; }
+        @keyframes correctPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
         .option.incorrect { background: var(--secondary); color: #fff; }
         .btn { background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; padding: 12px 25px; color: #fff; border-radius: 8px; cursor: pointer; transition: 0.3s ease; font-weight: bold; }
+        .btn.correct-btn { background: var(--success); }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--shadow); }
         .hidden { display: none; }
         .final-result { text-align: center; animation: pop 1s ease-out; position: relative; }
@@ -55,13 +63,16 @@
             <p class="subtitle">Responda e ganhe desconto!</p>
             <div class="discount-badge">💰 Até R$ 10,00!</div>
         </div>
-        <div class="progress-bar"><div class="progress" id="progress"></div></div>
+        <div class="question-counter" id="question-counter"></div>
+        <div class="score-display" id="score-display">💰 Pontos: R$ 0,00</div>
         <div id="intro">
             <p style="text-align: center;">🎉 Responda 5 perguntas e ganhe <strong>R$ 2,00</strong> por resposta certa!</p>
+            <p style="text-align: center; font-size: 0.9rem; margin-top: 5px; color: #444;">* Válido somente na compra do gás.</p>
             <div style="text-align: center; margin-top: 15px;">
                 <button class="btn" onclick="startQuiz()">🎯 Começar</button>
             </div>
         </div>
+        <div class="progress-bar"><div class="progress" id="progress"></div></div>
         <div id="quiz-content" class="hidden">
             <div id="question-container" class="question-card">
                 <div class="question-text" id="question-text"></div>
@@ -75,6 +86,7 @@
             <div class="final-message" id="final-message"></div>
             <p id="final-score"></p>
             <p><strong>🔥 Gás confiável, é com a Massoni Gás! 🔥</strong></p>
+            <p style="font-size: 0.9rem; color: #444;">* Válido somente na compra do gás.</p>
             <a id="whatsapp-share" class="whatsapp-share" target="_blank">Envie o cupom no Whatsapp</a>
             <p class="extra-text">Ou tire print e envie por whatsapp</p>
             <p class="extra-text"><em>cupom válido até 31.08.2025</em></p>
@@ -83,13 +95,16 @@
             </div>
         </div>
     </div>
+
+    <audio id="final-sound" src="https://www.myinstants.com/media/sounds/olha-o-gas.mp3"></audio>
+
     <script>
         const questions = [
-            { question: "Qual é o slogan da Massoni Gás?", options: ["Seu gás, nossa força", "Gás confiável, é com a Massoni Gás", "O gás da região"], correct: 1 },
-            { question: "Onde a Massoni Gás atua?", options: ["Santana de Parnaíba, Barueri e Pirapora do Bom Jesus", "Fazendinha", "Alphaville/Tamboré"], correct: 0 },
-            { question: "Qual é a cor do botijão da Massoni Gás?", options: ["Pratinha da Nacional Gás", "Amarelo", "Verde"], correct: 0 },
+            { question: "Qual é o slogan da Massoni Gás?", options: ["Seu gás, nossa força", "Gás confiável, é com a Massoni Gás", "O gás da região", "Sempre com você"], correct: 1 },
+            { question: "Onde a Massoni Gás atua?", options: ["Santana de Parnaíba, Barueri e Pirapora do Bom Jesus", "Fazendinha", "Alphaville/Tamboré", "Somente em Santana de Parnaíba"], correct: 0 },
+            { question: "Qual é a cor do botijão da Massoni Gás?", options: ["Pratinha da Nacional Gás", "Amarelo", "Cinza escuro", "Azul claro"], correct: 0 },
             { question: "Quantos dias por semana a Massoni Gás está aberta?", options: ["5 dias", "6 dias", "Todos os dias e feriados"], correct: 2 },
-            { question: "Além do gás, o que a Massoni Gás distribui?", options: ["Água Mineral, reguladores e acessórios", "Cervejas", "Carvão"], correct: 0 },
+            { question: "Além do gás, o que a Massoni Gás distribui?", options: ["Água mineral, reguladores, acessórios e produtos de limpeza", "Bebidas e gelo", "Carvão", "Conveniência"], correct: 0 },
         ];
         let currentQuestion = 0;
         let score = 0;
@@ -106,7 +121,7 @@
 
         function createConfetti() {
             const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
-            for (let i = 0; i < 100; i++) {
+            for (let i = 0; i < 50; i++) {
                 const confetti = document.createElement('div');
                 confetti.className = 'confetti';
                 confetti.style.left = Math.random() * 100 + 'vw';
@@ -124,6 +139,8 @@
         }
 
         function loadQuestion() {
+            document.getElementById("question-counter").textContent = `Pergunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById("score-display").textContent = `💰 Pontos: R$ ${score},00`;
             const q = questions[currentQuestion];
             document.getElementById("question-text").textContent = q.question;
             const optionsContainer = document.getElementById("options-container");
@@ -144,10 +161,14 @@
             const options = document.querySelectorAll(".option");
             if (index === correctIndex) {
                 element.classList.add("correct");
+                document.getElementById("next-btn").classList.add("correct-btn");
                 score += 2;
+                createConfetti();
             } else {
                 element.classList.add("incorrect");
+                document.getElementById("next-btn").classList.remove("correct-btn");
             }
+            document.getElementById("score-display").textContent = `💰 Pontos: R$ ${score},00`;
             options.forEach(opt => opt.onclick = null);
             document.getElementById("next-btn").classList.remove("hidden");
         }
@@ -168,7 +189,9 @@
 
             const message = `🎉 Consegui $${score},00 de desconto no Quiz da Massoni Gás! Meu cupom é: ${couponCode}. 🔥 Gás confiável, é com a Massoni Gás!`;
             document.getElementById("whatsapp-share").href = `https://wa.me/?text=${encodeURIComponent(message)}`;
-            createConfetti();
+
+            // Tocar o som final "Olha o gás"
+            document.getElementById("final-sound").play();
         }
 
         function restartQuiz() {
@@ -177,6 +200,7 @@
             document.getElementById("final-result").classList.add("hidden");
             document.getElementById("intro").classList.remove("hidden");
             document.getElementById("progress").style.width = "0%";
+            document.getElementById("score-display").textContent = "💰 Pontos: R$ 0,00";
         }
 
         function updateProgress() {
