@@ -113,6 +113,16 @@
     50% { transform: scale(1.2); opacity: 1; }
 }
 
+
+.option.correct.animate {
+    animation: correctHighlight 0.8s ease-out forwards;
+}
+@keyframes correctHighlight {
+    0% { transform: scale(1); background-color: #28a745; }
+    50% { transform: scale(1.1); background-color: #34d058; }
+    100% { transform: scale(1); background-color: #28a745; }
+}
+
 </style>
 </head>
 <body>
@@ -213,10 +223,10 @@
             const correctIndex = questions[currentQuestion].correct;
             const options = document.querySelectorAll(".option");
             if (index === correctIndex) {
-                element.classList.add("correct");
+                element.classList.add('correct', 'animate');
                 document.getElementById("next-btn").classList.add("correct-btn");
                 score += 2;
-                correctSound.play();
+                
                 createConfetti();
                 
             } else {
@@ -259,7 +269,7 @@
     
     if (score === 10) {
         createGoldenConfetti();
-        document.getElementById('victory-sound').play();
+        createStars();
         createStars();
     }
     
@@ -324,7 +334,7 @@ function createStars() {
 
 </script>
 
-<audio id="victory-sound" src="https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg"></audio>
+
 
 </body>
 </html>
