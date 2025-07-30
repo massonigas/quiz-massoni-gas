@@ -112,7 +112,7 @@
 
     <audio id="final-sound" src="https://www.myinstants.com/media/sounds/olha-o-gas.mp3"></audio>
     <audio id="error-sound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg"></audio>
-    <audio id="correct-sound" src="https://www.myinstants.com/media/sounds/uhul.mp3"></audio>
+    <audio id="correct-sound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg"></audio>
 
     <script>
         const questions = [
@@ -135,13 +135,7 @@
             return `MASSONI-GÁS${value}${randomCode}`;
         }
 
-        function showMascoteVoando() {
-            const img = document.createElement('img');
-            img.src = 'Mascote_voando.jpeg';
-            img.className = 'mascote-voando';
-            document.body.appendChild(img);
-            setTimeout(() => img.remove(), 1500);
-        }
+        
 
         function startQuiz() {
             document.getElementById("intro").classList.add("hidden");
@@ -177,7 +171,7 @@
                 document.getElementById("next-btn").classList.add("correct-btn");
                 score += 2;
                 correctSound.play();
-                showMascoteVoando();
+                
             } else {
                 element.classList.add("incorrect");
                 document.getElementById("next-btn").classList.remove("correct-btn");
