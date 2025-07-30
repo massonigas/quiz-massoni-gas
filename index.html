@@ -13,7 +13,7 @@
             --shadow: rgba(0, 0, 0, 0.2);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Arial', sans-serif; background: var(--primary); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 20px; }
+        body { font-family: 'Arial', sans-serif; background: var(--primary); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 20px; overflow-x: hidden; }
         .quiz-container { background: rgba(255, 255, 255, 0.95); border-radius: 20px; max-width: 600px; width: 100%; padding: 30px; box-shadow: 0 15px 35px var(--shadow); animation: fadeIn 0.8s ease-out; position: relative; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
         .header { text-align: center; margin-bottom: 20px; }
@@ -34,8 +34,17 @@
         .btn { background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; padding: 12px 25px; color: #fff; border-radius: 8px; cursor: pointer; transition: 0.3s ease; font-weight: bold; }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--shadow); }
         .hidden { display: none; }
-        .final-result { text-align: center; }
+        .final-result { text-align: center; animation: pop 1s ease-out; position: relative; }
+        @keyframes pop { from { transform: scale(0.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .final-message { font-size: 1.5rem; font-weight: bold; color: var(--secondary); margin-bottom: 10px; animation: flash 1s infinite alternate; }
+        @keyframes flash { from { opacity: 1; } to { opacity: 0.5; } }
         .whatsapp-share { margin-top: 15px; display: inline-block; background: #25D366; padding: 10px 20px; border-radius: 8px; color: white; font-weight: bold; text-decoration: none; }
+        .extra-text { margin-top: 10px; font-size: 0.95rem; color: #333; }
+        .confetti { position: fixed; width: 10px; height: 10px; background: red; animation: confetti-fall 3s linear infinite; z-index: 9999; }
+        @keyframes confetti-fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -63,10 +72,12 @@
             </div>
         </div>
         <div id="final-result" class="hidden final-result">
-            <h2>🎊 Quiz Finalizado! 🎊</h2>
+            <div class="final-message" id="final-message"></div>
             <p id="final-score"></p>
             <p><strong>🔥 Gás confiável, é com a Massoni Gás! 🔥</strong></p>
             <a id="whatsapp-share" class="whatsapp-share" target="_blank">📲 Compartilhar no WhatsApp</a>
+            <p class="extra-text">Ou tire print e envie por whatsapp</p>
+            <p class="extra-text"><em>cupom válido até 31.08.2025</em></p>
             <div style="margin-top: 15px;">
                 <button class="btn" onclick="restartQuiz()">🔄 Jogar Novamente</button>
             </div>
@@ -78,19 +89,32 @@
             { question: "Onde a Massoni Gás atua?", options: ["Santana de Parnaíba, Barueri e Pirapora do Bom Jesus", "Fazendinha", "Alphaville/Tamboré"], correct: 0 },
             { question: "Qual é a cor do botijão da Massoni Gás?", options: ["Pratinha da Nacional Gás", "Amarelo", "Verde"], correct: 0 },
             { question: "Quantos dias por semana a Massoni Gás está aberta?", options: ["5 dias", "6 dias", "Todos os dias e feriados"], correct: 2 },
-            { question: "Além do gás, o que a Massoni Gás distribui?", options: ["Água mineral", "Cervejas", "Carvão"], correct: 0 },
+            { question: "Além do gás, o que a Massoni Gás distribui?", options: ["Água Mineral, reguladores e acessórios", "Cervejas", "Carvão"], correct: 0 },
         ];
         let currentQuestion = 0;
         let score = 0;
         let couponCode = "";
 
-        function generateCouponCode() {
-            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-            const numbers = "0123456789";
-            let code = "MASSONI-";
-            for (let i = 0; i < 2; i++) code += letters.charAt(Math.floor(Math.random() * letters.length));
-            for (let i = 0; i < 3; i++) code += numbers.charAt(Math.floor(Math.random() * numbers.length));
-            return code;
+        function generateCouponCode(value) {
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            let randomCode = "";
+            for (let i = 0; i < 3; i++) {
+                randomCode += letters.charAt(Math.floor(Math.random() * letters.length));
+            }
+            return `MASSONI-GÁS${value}${randomCode}`;
+        }
+
+        function createConfetti() {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
+            for (let i = 0; i < 100; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = Math.random() * 100 + 'vw';
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = Math.random() * 2 + 's';
+                document.body.appendChild(confetti);
+                setTimeout(() => confetti.remove(), 3000);
+            }
         }
 
         function startQuiz() {
@@ -138,11 +162,13 @@
             document.getElementById("quiz-content").classList.add("hidden");
             document.getElementById("final-result").classList.remove("hidden");
 
-            couponCode = generateCouponCode();
-            document.getElementById("final-score").innerHTML = `💰 Seu desconto: R$ ${score},00<br>🎟️ Seu cupom: <strong>${couponCode}</strong>`;
+            couponCode = generateCouponCode(score);
+            document.getElementById("final-message").textContent = `🎉 Parabéns! Você ganhou $${score},00 de desconto!`;
+            document.getElementById("final-score").innerHTML = `💰 Valor: $${score},00<br>🎟️ Cupom: <strong>${couponCode}</strong>`;
 
-            const message = `🎉 Consegui R$ ${score},00 de desconto no Quiz da Massoni Gás! Meu cupom é: ${couponCode}. 🔥 Gás confiável, é com a Massoni Gás!`;
+            const message = `🎉 Consegui $${score},00 de desconto no Quiz da Massoni Gás! Meu cupom é: ${couponCode}. 🔥 Gás confiável, é com a Massoni Gás!`;
             document.getElementById("whatsapp-share").href = `https://wa.me/?text=${encodeURIComponent(message)}`;
+            createConfetti();
         }
 
         function restartQuiz() {
@@ -154,7 +180,7 @@
         }
 
         function updateProgress() {
-            const progress = ((currentQuestion) / questions.length) * 100;
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
             document.getElementById("progress").style.width = `${progress}%`;
         }
     </script>
