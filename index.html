@@ -67,7 +67,53 @@
             50% { opacity: 1; transform: scale(1.1); }
             100% { left: 120%; top: 40%; opacity: 0; transform: scale(0.8); }
         }
-    </style>
+    
+.confetti {
+    position: fixed;
+    width: 10px;
+    height: 10px;
+    background: red;
+    animation: confetti-fall 3s linear infinite;
+    z-index: 9999;
+}
+@keyframes confetti-fall {
+    0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+
+.parabens-animado {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #FFD700;
+    text-shadow: 2px 2px 4px #000;
+    margin-bottom: 15px;
+    animation: pulseText 1.5s infinite;
+    text-align: center;
+}
+@keyframes pulseText {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+
+.star {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    background: radial-gradient(circle, #fff 40%, transparent 70%);
+    border-radius: 50%;
+    animation: twinkle 1.5s infinite ease-in-out;
+    opacity: 0;
+    pointer-events: none;
+}
+@keyframes twinkle {
+    0%, 100% { transform: scale(0.5); opacity: 0; }
+    50% { transform: scale(1.2); opacity: 1; }
+}
+
+</style>
 </head>
 <body>
     <div class="quiz-container">
@@ -171,6 +217,7 @@
                 document.getElementById("next-btn").classList.add("correct-btn");
                 score += 2;
                 correctSound.play();
+                createConfetti();
                 
             } else {
                 element.classList.add("incorrect");
@@ -193,13 +240,30 @@
             document.getElementById("final-result").classList.remove("hidden");
 
             couponCode = generateCouponCode(score);
-            document.getElementById("final-message").textContent = `🎉 Parabéns! Você ganhou $${score},00 de desconto!`;
+            
+    document.getElementById("final-message").textContent = `🎉 Parabéns! Você ganhou $${score},00 de desconto!`;
+    if (score === 10) {
+        const parabensDiv = document.createElement('div');
+        parabensDiv.className = 'parabens-animado';
+        parabensDiv.innerHTML = '🎊 PARABÉNS, VOCÊ ACERTOU TODAS! 🎊';
+        document.getElementById("final-result").prepend(parabensDiv);
+    }
+    
             document.getElementById("final-score").innerHTML = `💰 Valor: $${score},00<br>🎟️ Cupom: <strong>${couponCode}</strong>`;
 
             const message = `🎉 Consegui $${score},00 de desconto no Quiz da Massoni Gás! Meu cupom é: ${couponCode}. 🔥 Gás confiável, é com a Massoni Gás!`;
             document.getElementById("whatsapp-share").href = `https://wa.me/?text=${encodeURIComponent(message)}`;
 
-            document.getElementById("final-sound").play();
+            
+    document.getElementById("final-sound").play();
+    
+    if (score === 10) {
+        createGoldenConfetti();
+        document.getElementById('victory-sound').play();
+        createStars();
+    }
+    
+    
         }
 
         function restartQuiz() {
@@ -215,6 +279,52 @@
             const progress = ((currentQuestion + 1) / questions.length) * 100;
             document.getElementById("progress").style.width = `${progress}%`;
         }
-    </script>
+    
+function createConfetti() {
+    const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4', '#feca57'];
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 3000);
+    }
+}
+
+
+function createGoldenConfetti() {
+    const colors = ['#FFD700', '#FFA500', '#FFEC8B'];
+    for (let i = 0; i < 100; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.width = (5 + Math.random() * 5) + 'px';
+        confetti.style.height = (5 + Math.random() * 5) + 'px';
+        confetti.style.animationDelay = Math.random() * 2 + 's';
+        document.body.appendChild(confetti);
+        setTimeout(() => confetti.remove(), 4000);
+    }
+}
+
+
+function createStars() {
+    for (let i = 0; i < 15; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        star.style.left = (Math.random() * 80 + 10) + 'vw';
+        star.style.top = (Math.random() * 50 + 10) + 'vh';
+        star.style.animationDelay = (Math.random() * 1.5) + 's';
+        document.body.appendChild(star);
+        setTimeout(() => star.remove(), 3000);
+    }
+}
+
+</script>
+
+<audio id="victory-sound" src="https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg"></audio>
+
 </body>
 </html>
