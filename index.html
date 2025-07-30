@@ -6,23 +6,21 @@
     <title>Quiz Massoni Gás - Ganhe Desconto!</title>
     <style>
         :root {
-            --primary: #4ecdc4;
-            --secondary: #45b7d1;
-            --danger: #ff6b6b;
-            --success: #51cf66;
-            --gradient-bg: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary: #004a93;
+            --secondary: #e30613;
             --white: #ffffff;
             --light-gray: #f8f9fa;
             --shadow: rgba(0, 0, 0, 0.2);
         }
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Arial', sans-serif; background: var(--gradient-bg); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 20px; }
+        body { font-family: 'Arial', sans-serif; background: var(--primary); min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 20px; }
         .quiz-container { background: rgba(255, 255, 255, 0.95); border-radius: 20px; max-width: 600px; width: 100%; padding: 30px; box-shadow: 0 15px 35px var(--shadow); animation: fadeIn 0.8s ease-out; position: relative; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
         .header { text-align: center; margin-bottom: 20px; }
+        .header img { max-width: 220px; margin-bottom: 15px; }
         .title { font-size: 2rem; font-weight: bold; color: var(--primary); }
-        .subtitle { font-size: 1rem; color: #555; margin-bottom: 10px; }
-        .discount-badge { background: linear-gradient(45deg, var(--danger), #ff8e53); color: var(--white); padding: 10px 20px; border-radius: 50px; font-weight: bold; display: inline-block; animation: pulse 1.5s infinite; }
+        .subtitle { font-size: 1rem; color: #333; margin-bottom: 10px; }
+        .discount-badge { background: linear-gradient(45deg, var(--secondary), #ff5252); color: var(--white); padding: 10px 20px; border-radius: 50px; font-weight: bold; display: inline-block; animation: pulse 1.5s infinite; }
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         .progress-bar { height: 10px; background: var(--light-gray); border-radius: 10px; overflow: hidden; margin-bottom: 20px; }
         .progress { height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary)); transition: width 0.4s ease; }
@@ -31,8 +29,8 @@
         .options { display: flex; flex-direction: column; gap: 10px; }
         .option { padding: 10px; background: var(--white); border-radius: 8px; border: 2px solid #ddd; cursor: pointer; transition: all 0.3s ease; }
         .option:hover { border-color: var(--primary); transform: translateY(-2px); }
-        .option.correct { background: var(--success); color: #fff; }
-        .option.incorrect { background: var(--danger); color: #fff; }
+        .option.correct { background: var(--primary); color: #fff; }
+        .option.incorrect { background: var(--secondary); color: #fff; }
         .btn { background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; padding: 12px 25px; color: #fff; border-radius: 8px; cursor: pointer; transition: 0.3s ease; font-weight: bold; }
         .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 12px var(--shadow); }
         .hidden { display: none; }
@@ -43,6 +41,7 @@
 <body>
     <div class="quiz-container">
         <div class="header">
+            <img src="Massoni_Gas_Logo_Mascote.png" alt="Massoni Gás">
             <h1 class="title">🔥 Quiz Massoni Gás 🔥</h1>
             <p class="subtitle">Responda e ganhe desconto!</p>
             <div class="discount-badge">💰 Até R$ 10,00!</div>
@@ -83,7 +82,23 @@
         ];
         let currentQuestion = 0;
         let score = 0;
-        function startQuiz() { document.getElementById("intro").classList.add("hidden"); document.getElementById("quiz-content").classList.remove("hidden"); loadQuestion(); }
+        let couponCode = "";
+
+        function generateCouponCode() {
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const numbers = "0123456789";
+            let code = "MASSONI-";
+            for (let i = 0; i < 2; i++) code += letters.charAt(Math.floor(Math.random() * letters.length));
+            for (let i = 0; i < 3; i++) code += numbers.charAt(Math.floor(Math.random() * numbers.length));
+            return code;
+        }
+
+        function startQuiz() {
+            document.getElementById("intro").classList.add("hidden");
+            document.getElementById("quiz-content").classList.remove("hidden");
+            loadQuestion();
+        }
+
         function loadQuestion() {
             const q = questions[currentQuestion];
             document.getElementById("question-text").textContent = q.question;
@@ -99,26 +114,49 @@
             document.getElementById("next-btn").classList.add("hidden");
             updateProgress();
         }
+
         function selectOption(index, element) {
             const correctIndex = questions[currentQuestion].correct;
             const options = document.querySelectorAll(".option");
-            options.forEach((opt, i) => {
-                if (i === correctIndex) opt.classList.add("correct");
-                else if (i === index) opt.classList.add("incorrect");
-            });
-            if (index === correctIndex) score += 2;
+            if (index === correctIndex) {
+                element.classList.add("correct");
+                score += 2;
+            } else {
+                element.classList.add("incorrect");
+            }
+            options.forEach(opt => opt.onclick = null);
             document.getElementById("next-btn").classList.remove("hidden");
         }
-        function nextQuestion() { currentQuestion++; if (currentQuestion >= questions.length) showFinalResult(); else loadQuestion(); }
+
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion >= questions.length) showFinalResult();
+            else loadQuestion();
+        }
+
         function showFinalResult() {
             document.getElementById("quiz-content").classList.add("hidden");
             document.getElementById("final-result").classList.remove("hidden");
-            document.getElementById("final-score").innerHTML = `💰 Seu desconto: R$ ${score},00`;
-            const message = `🎉 Consegui R$ ${score},00 de desconto no Quiz da Massoni Gás! 🔥 Gás confiável, é com a Massoni Gás!`;
+
+            couponCode = generateCouponCode();
+            document.getElementById("final-score").innerHTML = `💰 Seu desconto: R$ ${score},00<br>🎟️ Seu cupom: <strong>${couponCode}</strong>`;
+
+            const message = `🎉 Consegui R$ ${score},00 de desconto no Quiz da Massoni Gás! Meu cupom é: ${couponCode}. 🔥 Gás confiável, é com a Massoni Gás!`;
             document.getElementById("whatsapp-share").href = `https://wa.me/?text=${encodeURIComponent(message)}`;
         }
-        function restartQuiz() { score = 0; currentQuestion = 0; document.getElementById("final-result").classList.add("hidden"); document.getElementById("intro").classList.remove("hidden"); document.getElementById("progress").style.width = "0%"; }
-        function updateProgress() { const progress = ((currentQuestion) / questions.length) * 100; document.getElementById("progress").style.width = `${progress}%`; }
+
+        function restartQuiz() {
+            score = 0;
+            currentQuestion = 0;
+            document.getElementById("final-result").classList.add("hidden");
+            document.getElementById("intro").classList.remove("hidden");
+            document.getElementById("progress").style.width = "0%";
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion) / questions.length) * 100;
+            document.getElementById("progress").style.width = `${progress}%`;
+        }
     </script>
 </body>
 </html>
